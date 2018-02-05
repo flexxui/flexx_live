@@ -1,5 +1,12 @@
+""" Server that serves a simple landing page that includes a list of
+links to apps. These apps are statically served.
+
+Also hosts an API that flexx can POST to to submit static apps.
+"""
+
 import os
 import io
+import sys
 import shutil
 import asyncio
 import zipfile
@@ -7,7 +14,9 @@ import zipfile
 from aiohttp import web
 
 
-config = {'appdir': '~/flexx_apps'}
+config = {'appdir': '~/flexx_apps',
+          'host': '127.0.0.1',
+          'port': 8080}
 
 
 ## Submit stuff
@@ -125,6 +134,14 @@ app = web.Application()
 
 def start():
     
+    # Parse cli args to init config
+    for arg in sys.argv[1:]:
+        if '=' in arg:
+            key, _, value = arg.partition('=')
+            key = key.lower()
+            if key in config:
+                config[key] = value
+    
     app.router.add_get('/', handle_root)
     app.router.add_get('/{fname}', handle_root)
     app.router.add_post('/submit/{name}/{token}', handle_submit)
@@ -132,7 +149,7 @@ def start():
     app.router.add_get('/open/{name}/', handle_app_root)
     app.router.add_static('/open', get_app_dir())
 
-    web.run_app(app, host='127.0.0.1', port=8080)
+    web.run_app(app, host=config['host'], port=int(config['port']))
 
 
 if __name__ == '__main__':
