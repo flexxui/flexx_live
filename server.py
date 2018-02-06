@@ -97,13 +97,17 @@ def submit_app(name, token, blob):
 ## Main Website 
 
 
-
 async def handle_root(request):
     # Image asset?
     fname = request.match_info.get('fname', '')
-    if fname in ('flexx.ico', 'flexx.png'):
-        fname = os.path.join(os.path.dirname(__file__), fname)
-        return web.Response(body=open(fname, 'rb').read())
+    if fname:
+        if fname in ('flexx.ico', 'flexx.png'):
+            fname = os.path.join(os.path.dirname(__file__), fname)
+            return web.Response(body=open(fname, 'rb').read())
+        elif fname == 'stop' and request.remote == '127.0.0.1':
+            asyncio.get_event_loop().stop()
+            return web.Response(text='Stopping server ...')
+        return web.Response(status=404)
     
     # Collect html for list of apps
     app_lines = []

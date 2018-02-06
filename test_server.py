@@ -2,7 +2,9 @@
 Script to test the Flexx website server.
 """
 
+import os
 import io
+import shutil
 import asyncio
 import threading
 import zipfile
@@ -11,18 +13,21 @@ import requests
 
 import server
 
-cur_loop = None
 
 def start():
-    global cur_loop
-    cur_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(cur_loop)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     server.start()
 
 
 def test_server():
     
     url = 'http://localhost:8080'
+    
+    # Clear test app dir
+    testdir = os.path.join(server.get_app_dir(), 'test')
+    if os.path.isdir(testdir):
+        shutil.rmtree(testdir)
     
     # Spin up the server in a separate thread
     t = threading.Thread(target=start)
@@ -70,7 +75,8 @@ def test_server():
     
     # Stop and join
     print('test passed, stopping server ...')
-    cur_loop.stop()
+    r = requests.get(url + '/stop')
+    assert r.status_code == 200, r.status_code
     t.join()
     print('done.')
 
