@@ -50,22 +50,26 @@ def get_app_dir(sub=None):
 def submit_app(name, token, blob):
     
     # Init
-    name = name.strip().lower()
-    token = token.strip()
     appdir = get_app_dir(name)
     tokenfile = os.path.join(appdir, '.token')
+    name = name.strip().lower()
+    if '>>' in token:
+        cur_token, _, new_token = token.partition('>>')
+        cur_token, new_token = cur_token.strip(), new_token.strip()
+    else:
+        cur_token = new_token = token.strip()
     
     # Check app and token
     if not name.isidentifier():  # must also be nonempty
         raise Exception('Invalid app name provided.')
-    if not token:
+    if not cur_token:
         raise Exception('Invalid token provided.')
     
     # Check whether we have "permission" to write this app
     ref_token = None
     if os.path.isfile(tokenfile):
         ref_token = open(tokenfile, 'rb').read().decode().strip()
-    if ref_token is not None and token != ref_token:
+    if ref_token is not None and cur_token != ref_token:
         raise Exception('Invalid token provided for app %r.' % name)
     
     # Blob ok?
@@ -78,7 +82,7 @@ def submit_app(name, token, blob):
         shutil.rmtree(appdir)
     os.mkdir(appdir)
     with open(tokenfile, 'wb') as f:
-        f.write(token.encode())
+        f.write(new_token.encode())
     
     # Unpack
     f = io.BytesIO(blob)

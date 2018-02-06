@@ -30,7 +30,7 @@ def test_server():
     
     # Do request for index page
     r = requests.get(url)
-    assert r.status_code == 200
+    assert r.status_code == 200, r.text
     assert 'flexx' in r.text.lower()
     
     # Create silly app bundle
@@ -40,12 +40,12 @@ def test_server():
     
     # Submit
     r = requests.post(url + '/submit/test/1234', data = f.getvalue())
-    assert r.status_code == 200
+    assert r.status_code == 200, r.text
     assert 'thanks' in r.text.lower()
     
     # Check that its there
     r = requests.get(url + '/open/test/')
-    assert r.status_code == 200
+    assert r.status_code == 200, r.text
     assert r.text == 'Silly test app'
     
     # Check fails
@@ -55,9 +55,18 @@ def test_server():
     r = requests.post(url + '/submit/test/%20', data = f.getvalue())
     assert r.status_code == 403
     #
-    r = requests.post(url + '/submit/test/other_token', data = f.getvalue())
+    r = requests.post(url + '/submit/test/567', data = f.getvalue())
     assert r.status_code == 403
     
+    # Rename token
+    r = requests.post(url + '/submit/test/1234>>567', data = f.getvalue())
+    assert r.status_code == 200, r.text
+    assert 'thanks' in r.text.lower()
+    
+    # Check
+    r = requests.post(url + '/submit/test/567', data = f.getvalue())
+    assert r.status_code == 200, r.text
+    assert 'thanks' in r.text.lower()
     
     # Stop and join
     print('test passed, stopping server ...')
