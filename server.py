@@ -123,14 +123,11 @@ async def handle_root(request):
     return web.Response(text=text, content_type='text/html')
 
 
-async def handle_app(request):
-    print('request at ', request.path)
-
-
 async def handle_app_root(request):
     fname = os.path.join(get_app_dir(), request.match_info.get('name', ''), 'index.html')
     if os.path.isfile(fname):
-        return web.Response(text=open(fname, 'rb').read().decode())
+        text = open(fname, 'rb').read().decode()
+        return web.Response(text=text, content_type='text/html')
     else:
         return web.Response(status=404)
 
