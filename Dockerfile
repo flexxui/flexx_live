@@ -23,4 +23,4 @@ RUN apk add --no-cache gcc g++ make linux-headers musl-dev libffi-dev openssl-de
 WORKDIR /root
 COPY . .
 
-CMD python server.py --host=0.0.0.0 --port=80 --appdir=/root/flexx_apps
+CMD python server.py host=0.0.0.0 port=80 appdir=/root/flexx_apps
