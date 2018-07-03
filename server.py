@@ -98,6 +98,9 @@ def submit_app(name, token, blob):
 
 
 async def handle_root(request):
+    # Redirect?
+    if request.host.endswith('.live'):
+        return web.Response(status=307, headers=[("Location", 'flexx.app')])
     # Image asset?
     fname = request.match_info.get('fname', '')
     if fname:
